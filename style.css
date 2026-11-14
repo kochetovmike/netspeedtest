@@ -98,6 +98,7 @@ main {
 .seg.red { fill: #2a1a1d; }
 .seg.on { fill: var(--accent); filter: drop-shadow(0 0 3px var(--accent)); }
 .seg.on.red { fill: var(--red); filter: drop-shadow(0 0 4px var(--red)); }
+.sweep .seg { transition: none; }
 
 .scale-label { fill: var(--faint); font: 500 8.5px var(--digital); text-anchor: middle; dominant-baseline: middle; }
 .readout { fill: var(--text); font: 700 34px var(--digital); text-anchor: middle; letter-spacing: .02em; transition: fill .2s; }

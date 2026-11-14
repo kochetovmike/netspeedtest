@@ -46,6 +46,13 @@ function valueToFrac(v) {
   return 1;
 }
 
+function fracToValue(f) {
+  const n = SCALE.length - 1;
+  const x = Math.min(Math.max(f, 0), 1) * n;
+  const i = Math.min(Math.floor(x), n - 1);
+  return SCALE[i] + (x - i) * (SCALE[i + 1] - SCALE[i]);
+}
+
 function fmtSpeed(v) {
   if (!(v > 0)) return '0.00';
   if (v < 10) return v.toFixed(2);
@@ -135,7 +142,17 @@ class Gauge {
     this.shownFrac += (target - this.shownFrac) * 0.16;
     this.shownNum += (this.value - this.shownNum) * 0.2;
     if (Math.abs(this.value - this.shownNum) < 0.005) this.shownNum = this.value;
+    this.render();
+  }
 
+  // Draw at an explicit arc position, bypassing easing (used for the load sweep).
+  force(frac) {
+    this.shownFrac = frac;
+    this.shownNum = fracToValue(frac);
+    this.render();
+  }
+
+  render() {
     const lit = Math.round(this.shownFrac * G.N);
     if (lit !== this.lit) {
       for (let i = 0; i < G.N; i++) this.segs[i].classList.toggle('on', i < lit);
@@ -469,9 +486,27 @@ const startBtn = $('start');
 const statusEl = $('status');
 const progressEl = $('progress-fill');
 
+// Ignition sweep on load: gauges go to full scale and back within SWEEP_MS.
+const SWEEP_MS = 280;
+let sweepStart = matchMedia('(prefers-reduced-motion: reduce)').matches ? null : now();
+if (sweepStart !== null) document.documentElement.classList.add('sweep');
+let running = false;
+
 (function loop() {
-  gDown.tick();
-  gUp.tick();
+  const p = sweepStart === null ? 1 : (now() - sweepStart) / SWEEP_MS;
+  if (p < 1 && !running) {
+    const f = Math.sin(Math.PI * p);
+    gDown.force(f);
+    gUp.force(f);
+  } else {
+    if (sweepStart !== null) {
+      sweepStart = null;
+      gDown.force(0); gUp.force(0);
+      document.documentElement.classList.remove('sweep');
+    }
+    gDown.tick();
+    gUp.tick();
+  }
   requestAnimationFrame(loop);
 })();
 
@@ -495,8 +530,6 @@ function phaseProgress(phase, frac) {
   const w = { latency: [0, 0.08], down: [0.08, 0.54], up: [0.54, 1] }[phase];
   progressEl.style.width = ((w[0] + (w[1] - w[0]) * frac) * 100).toFixed(1) + '%';
 }
-
-let running = false;
 
 async function runTest() {
   if (running) return;
@@ -564,9 +597,3 @@ try { savedOS = localStorage.getItem('ns-os'); } catch (_) {}
 renderCommands(['win', 'mac', 'linux'].includes(savedOS) ? savedOS : detectOS());
 renderConn();
 loadConnection();
-
-// Ignition sweep: sweep the gauges to full scale and back on load.
-if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  gDown.set(1000); gUp.set(1000);
-  setTimeout(() => { if (!running) { gDown.set(0); gUp.set(0); } }, 650);
-}
