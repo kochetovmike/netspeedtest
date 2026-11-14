@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Network Speed Test</title>
+  <meta name="description" content="Minimal browser-based network speed test: download, upload, ping, jitter, your public IP and approximate location, plus handy network commands.">
+  <meta name="theme-color" content="#0a0c0f">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 22a11 11 0 1 1 22 0' fill='none' stroke='%2322d3ee' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M16 22l6-8' stroke='%23f59e0b' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://speed.cloudflare.com">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <span class="brand"><span class="brand-mark"></span>netspeed</span>
+    <a class="home" href="https://kochetovmike.github.io/">kochetovmike.github.io&nbsp;↗</a>
+  </header>
+
+  <main>
+    <section class="dash" aria-label="Speed test">
+      <figure class="gauge" id="gauge-down" data-label="Download" data-arrow="↓"></figure>
+
+      <div class="center">
+        <div class="metric">
+          <span class="metric-label">Ping</span>
+          <span class="metric-value"><b id="ping">—</b><small>ms</small></span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Jitter</span>
+          <span class="metric-value"><b id="jitter">—</b><small>ms</small></span>
+        </div>
+        <button id="start" class="start" type="button">Start</button>
+        <ol class="steps" aria-label="Test progress">
+          <li data-step="latency">Ping</li>
+          <li data-step="down">Download</li>
+          <li data-step="up">Upload</li>
+        </ol>
+        <div class="progress" aria-hidden="true"><i id="progress-fill"></i></div>
+        <p class="status" id="status" role="status" aria-live="polite">Ready</p>
+      </div>
+
+      <figure class="gauge" id="gauge-up" data-label="Upload" data-arrow="↑"></figure>
+    </section>
+
+    <section class="card" aria-labelledby="conn-title">
+      <h2 id="conn-title">Your connection</h2>
+      <dl class="conn">
+        <div class="conn-ip">
+          <dt>Public IP</dt>
+          <dd><span id="ip" class="mono">…</span> <span id="ip-type" class="tag" hidden></span>
+            <button class="copy" data-copy-target="ip" type="button" title="Copy IP">copy</button></dd>
+        </div>
+        <div><dt>Location</dt><dd id="location">…</dd></div>
+        <div><dt>ISP</dt><dd id="isp">…</dd></div>
+        <div><dt>ASN</dt><dd id="asn" class="mono">…</dd></div>
+        <div><dt>Timezone</dt><dd id="timezone">…</dd></div>
+        <div><dt>Coordinates</dt><dd id="coords" class="mono">…</dd></div>
+      </dl>
+      <p class="note">Location is estimated from your IP address and may point to your ISP's hub rather than your actual position.</p>
+    </section>
+
+    <section class="card" aria-labelledby="cmd-title">
+      <div class="card-head">
+        <h2 id="cmd-title">Useful commands</h2>
+        <div class="tabs" role="tablist" aria-label="Operating system">
+          <button role="tab" type="button" data-os="win">Windows</button>
+          <button role="tab" type="button" data-os="mac">macOS</button>
+          <button role="tab" type="button" data-os="linux">Linux</button>
+        </div>
+      </div>
+      <ul class="cmds" id="cmds"></ul>
+    </section>
+  </main>
+
+  <footer class="foot">
+    Measured against Cloudflare's edge network (speed.cloudflare.com). Results depend on your device, browser and Wi-Fi as well as your line.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
