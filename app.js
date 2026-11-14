@@ -53,12 +53,13 @@ function fracToValue(f) {
   return SCALE[i] + (x - i) * (SCALE[i + 1] - SCALE[i]);
 }
 
+// Always shown to 1/100 Mbps.
 function fmtSpeed(v) {
-  if (!(v > 0)) return '0.00';
-  if (v < 10) return v.toFixed(2);
-  if (v < 100) return v.toFixed(1);
-  return v.toFixed(0);
+  return v > 0 ? v.toFixed(2) : '0.00';
 }
+
+// Readout font size by text length, so longer numbers stay clear of the scale labels.
+const READOUT_SIZE = { 4: 34, 5: 31, 6: 28, 7: 22 };
 
 function fmtBytes(b) {
   if (b < 1e6) return (b / 1e3).toFixed(0) + ' kB';
@@ -159,7 +160,12 @@ class Gauge {
       this.lit = lit;
     }
     const text = fmtSpeed(this.shownNum);
-    if (this.readout.textContent !== text) this.readout.textContent = text;
+    if (this.readout.textContent !== text) {
+      if (text.length !== this.readout.textContent.length) {
+        this.readout.style.fontSize = (READOUT_SIZE[text.length] || 19) + 'px';
+      }
+      this.readout.textContent = text;
+    }
   }
 }
 
